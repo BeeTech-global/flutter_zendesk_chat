@@ -29,7 +29,7 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   final zendeskChat = ZendeskChat(
-    accountKey: '',
+    accountKey: 'MyqHVBcMtviH16mTlMyl0AlpYYsJLS2i',
   );
 
   @override
@@ -48,7 +48,12 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          zendeskChat.openChatScreen(context);
+          zendeskChat.openChatScreen(
+            context,
+            ChatSettings(
+              visitor: Visitor(name: 'Eliseu'),
+            ),
+          );
         },
         tooltip: 'Zendesk Chat',
         child: Icon(Icons.chat),

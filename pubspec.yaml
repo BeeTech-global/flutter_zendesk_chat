@@ -1,8 +1,8 @@
 name: zendesk_chat
-description: A new Flutter package project.
+description: Flutter zendesk chat widget
 version: 0.0.1
-author:
-homepage:
+author: Eliseu Codinhoto <zeucxb@gmail.com>
+homepage: https://github.com/BeeTech-global/flutter_zendesk_chat
 
 environment:
   sdk: ">=2.1.0 <3.0.0"

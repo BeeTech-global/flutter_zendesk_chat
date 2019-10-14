@@ -1,25 +1,35 @@
 library zendesk_chat;
 
 import 'package:flutter/material.dart';
-import 'package:zendesk_chat/zendesk_chat_screen.dart';
+import 'package:zendesk_chat/models/models.dart';
 import 'package:zendesk_flutter_plugin/zendesk_flutter_plugin.dart';
 
-export 'package:zendesk_chat/zendesk_chat_screen.dart';
+import 'package:zendesk_chat/widgets/widgets.dart';
+
+export 'package:zendesk_chat/widgets/widgets.dart';
+export 'package:zendesk_chat/models/models.dart';
 
 /// Zendesk Chat Components.
 class ZendeskChat {
   final String accountKey;
 
-  final ZendeskFlutterPlugin zendeskFlutterPlugin = ZendeskFlutterPlugin();
+  ZendeskFlutterPlugin zendeskFlutterPlugin = ZendeskFlutterPlugin();
 
-  ZendeskChat({@required this.accountKey}) : assert(accountKey != null);
+  ZendeskChat({
+    @required this.accountKey,
+  }) : assert(accountKey != null && accountKey != '') {
+    zendeskFlutterPlugin.init(accountKey);
+  }
 
   /// Open zendesk chat screen
-  void openChatScreen(BuildContext context) {
+  void openChatScreen(BuildContext context, ChatSettings chatSettings) {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => ZendeskChatScreen(),
+        builder: (context) => ZendeskChatScreen(
+          zendeskSdk: zendeskFlutterPlugin,
+          chatSettings: chatSettings,
+        ),
       ),
     );
   }
