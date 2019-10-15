@@ -20,7 +20,8 @@ class ZendeskChatWidget extends StatefulWidget {
 }
 
 class _ZendeskChatWidgetState extends State<ZendeskChatWidget> {
-  List<ChatItem> chatLog = [];
+  ConnectionStatus _connectionStatus;
+  List<ChatItem> _chatLog = [];
   ChatSettings get chatSettings => widget.chatSettings;
   ZendeskFlutterPlugin get zendeskSdk => widget.zendeskSdk;
 
@@ -42,10 +43,18 @@ class _ZendeskChatWidgetState extends State<ZendeskChatWidget> {
       tags: chatSettings?.tags,
     );
 
+    zendeskSdk.onConnectionStatusChanged
+        .listen((ConnectionStatus connectionStatus) {
+      if (!mounted) return;
+      setState(() {
+        _connectionStatus = connectionStatus;
+      });
+    });
+
     zendeskSdk.onChatItemsChanged.listen((List<ChatItem> chatLog) {
       if (!mounted) return;
       setState(() {
-        this.chatLog = chatLog;
+        _chatLog = chatLog;
       });
     });
   }
@@ -58,11 +67,11 @@ class _ZendeskChatWidgetState extends State<ZendeskChatWidget> {
 
   Widget mapChatLogToMessage(ChatItem chatItem) {
     MainAxisAlignment alignment = MainAxisAlignment.start;
-    Color color = Colors.green;
+    Color color = Theme.of(context).primaryColor;
 
     if (chatItem.nick.startsWith('visitor')) {
       alignment = MainAxisAlignment.end;
-      color = Colors.blueAccent;
+      color = Theme.of(context).accentColor;
     }
 
     return Row(
@@ -73,7 +82,7 @@ class _ZendeskChatWidgetState extends State<ZendeskChatWidget> {
             color: color,
             borderRadius: BorderRadius.circular(10),
           ),
-          margin: EdgeInsets.symmetric(vertical: 10),
+          margin: EdgeInsets.symmetric(vertical: 5),
           padding: EdgeInsets.all(15),
           width: MediaQuery.of(context).size.width / 100 * 80,
           child: Wrap(
@@ -84,7 +93,7 @@ class _ZendeskChatWidgetState extends State<ZendeskChatWidget> {
                   Container(
                     margin: EdgeInsets.only(bottom: 5),
                     child: Text(
-                      chatItem.displayName,
+                      chatItem?.displayName,
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
                         color: Colors.white,
@@ -92,7 +101,7 @@ class _ZendeskChatWidgetState extends State<ZendeskChatWidget> {
                     ),
                   ),
                   Text(
-                    chatItem.message,
+                    chatItem?.message ?? '',
                     style: TextStyle(
                       color: Colors.white,
                     ),
@@ -108,43 +117,66 @@ class _ZendeskChatWidgetState extends State<ZendeskChatWidget> {
 
   @override
   Widget build(BuildContext context) {
+    return Stack(
+      children: <Widget>[
+        _buildChat(),
+        (_connectionStatus == ConnectionStatus.CONNECTING)
+            ? _buildLoader()
+            : Container(),
+      ],
+    );
+  }
+
+  Widget _buildLoader() {
     return Container(
-      color: Colors.white.withOpacity(0.8),
+      height: MediaQuery.of(context).size.height,
       width: MediaQuery.of(context).size.width,
-      padding: EdgeInsets.symmetric(vertical: 50, horizontal: 20),
+      color: Colors.white.withOpacity(0.7),
+      child: Center(
+        child: CircularProgressIndicator(),
+      ),
+    );
+  }
+
+  Widget _buildChat() {
+    return SafeArea(
       child: Column(
         children: [
           Expanded(
             child: SingleChildScrollView(
+              padding: EdgeInsets.symmetric(horizontal: 10),
               reverse: true,
               child: Column(
-                children: chatLog.map(mapChatLogToMessage).toList(),
+                children: _chatLog.map(mapChatLogToMessage).toList(),
               ),
             ),
           ),
-          Row(
-            children: <Widget>[
-              Expanded(
-                child: TextField(
-                  controller: msgController,
-                  minLines: 1,
-                  maxLines: 5,
-                ),
-              ),
-              IconButton(
-                icon: Icon(
-                  Icons.send,
-                  color: Colors.blue,
-                ),
-                onPressed: () async {
-                  await zendeskSdk.sendMessage(msgController.text);
-                  msgController.clear();
-                },
-              )
-            ],
-          )
+          _chatInput(),
         ],
       ),
     );
   }
+
+  Widget _chatInput() => Container(
+        padding: EdgeInsets.symmetric(horizontal: 10),
+        child: TextField(
+          enabled: _connectionStatus == ConnectionStatus.CONNECTED,
+          controller: msgController,
+          minLines: 1,
+          maxLines: 5,
+          decoration: InputDecoration(
+            filled: true,
+            suffixIcon: IconButton(
+              icon: Icon(
+                Icons.send,
+                // color: Colors.blue,
+              ),
+              onPressed: () async {
+                await zendeskSdk.sendMessage(msgController.text);
+                msgController.clear();
+              },
+            ),
+          ),
+        ),
+      );
 }
