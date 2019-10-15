@@ -67,11 +67,11 @@ class _ZendeskChatWidgetState extends State<ZendeskChatWidget> {
 
   Widget mapChatLogToMessage(ChatItem chatItem) {
     MainAxisAlignment alignment = MainAxisAlignment.start;
-    Color color = Colors.green;
+    Color color = Theme.of(context).primaryColor;
 
     if (chatItem.nick.startsWith('visitor')) {
       alignment = MainAxisAlignment.end;
-      color = Colors.blueAccent;
+      color = Theme.of(context).accentColor;
     }
 
     return Row(
