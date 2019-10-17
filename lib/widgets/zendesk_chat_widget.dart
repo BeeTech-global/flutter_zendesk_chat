@@ -3,14 +3,66 @@ import 'package:zendesk_chat/models/chat_settings_model.dart';
 import 'package:zendesk_flutter_plugin/chat_models.dart';
 import 'package:zendesk_flutter_plugin/zendesk_flutter_plugin.dart';
 
+class ChatStyle {
+  final Color mainColor;
+  final Color visitorColor;
+  final TextStyle nameTextStyle;
+  final TextStyle descriptionTextStyle;
+
+  const ChatStyle({
+    this.mainColor,
+    this.visitorColor,
+    this.nameTextStyle,
+    this.descriptionTextStyle,
+  });
+
+  ChatStyle copyWith({
+    Color mainColor,
+    Color visitorColor,
+    TextStyle nameTextStyle,
+    TextStyle descriptionTextStyle,
+  }) {
+    return ChatStyle(
+      mainColor: mainColor ?? this.mainColor,
+      visitorColor: visitorColor ?? this.visitorColor,
+      nameTextStyle: nameTextStyle ?? this.nameTextStyle,
+      descriptionTextStyle: descriptionTextStyle ?? this.descriptionTextStyle,
+    );
+  }
+}
+
+class _DefaultStyle extends ChatStyle {
+  final Color mainColor = Colors.blue;
+  final Color visitorColor = Colors.green;
+  final TextStyle nameTextStyle = const TextStyle(
+    fontWeight: FontWeight.bold,
+    color: Colors.white,
+  );
+
+  final TextStyle descriptionTextStyle = const TextStyle(
+    color: Colors.white,
+  );
+
+  const _DefaultStyle({
+    Color mainColor,
+    Color visitorColor,
+    TextStyle nameTextStyle,
+    TextStyle descriptionTextStyle,
+  });
+}
+
+const ChatStyle _defaultStyle = const _DefaultStyle();
+
 class ZendeskChatWidget extends StatefulWidget {
   final ChatSettings chatSettings;
   final ZendeskFlutterPlugin zendeskSdk;
+  final ChatStyle chatStyle;
 
   const ZendeskChatWidget({
     Key key,
     @required this.zendeskSdk,
     @required this.chatSettings,
+    this.chatStyle = _defaultStyle,
   })  : assert(chatSettings != null),
         assert(zendeskSdk != null),
         super(key: key);
@@ -22,8 +74,12 @@ class ZendeskChatWidget extends StatefulWidget {
 class _ZendeskChatWidgetState extends State<ZendeskChatWidget> {
   ConnectionStatus _connectionStatus;
   List<ChatItem> _chatLog = [];
+
   ChatSettings get chatSettings => widget.chatSettings;
+
   ZendeskFlutterPlugin get zendeskSdk => widget.zendeskSdk;
+
+  ChatStyle get chatStyle => widget.chatStyle;
 
   final msgController = TextEditingController();
 
@@ -67,11 +123,11 @@ class _ZendeskChatWidgetState extends State<ZendeskChatWidget> {
 
   Widget mapChatLogToMessage(ChatItem chatItem) {
     MainAxisAlignment alignment = MainAxisAlignment.start;
-    Color color = Theme.of(context).primaryColor;
+    Color color = chatStyle.mainColor;
 
     if (chatItem.nick.startsWith('visitor')) {
       alignment = MainAxisAlignment.end;
-      color = Theme.of(context).accentColor;
+      color = chatStyle.visitorColor;
     }
 
     return Row(
@@ -94,17 +150,12 @@ class _ZendeskChatWidgetState extends State<ZendeskChatWidget> {
                     margin: EdgeInsets.only(bottom: 5),
                     child: Text(
                       chatItem?.displayName,
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                      ),
+                      style: chatStyle.nameTextStyle,
                     ),
                   ),
                   Text(
                     chatItem?.message ?? '',
-                    style: TextStyle(
-                      color: Colors.white,
-                    ),
+                    style: chatStyle.descriptionTextStyle,
                   ),
                 ],
               )
