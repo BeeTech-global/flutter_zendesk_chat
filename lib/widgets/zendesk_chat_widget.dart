@@ -1,35 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:zendesk_chat/models/chat_settings_model.dart';
+import 'package:zendesk_chat/models/chat_style.dart';
 import 'package:zendesk_flutter_plugin/chat_models.dart';
 import 'package:zendesk_flutter_plugin/zendesk_flutter_plugin.dart';
 
-class ChatStyle {
-  final Color mainColor;
-  final Color visitorColor;
-  final TextStyle nameTextStyle;
-  final TextStyle descriptionTextStyle;
 
-  const ChatStyle({
-    this.mainColor,
-    this.visitorColor,
-    this.nameTextStyle,
-    this.descriptionTextStyle,
-  });
-
-  ChatStyle copyWith({
-    Color mainColor,
-    Color visitorColor,
-    TextStyle nameTextStyle,
-    TextStyle descriptionTextStyle,
-  }) {
-    return ChatStyle(
-      mainColor: mainColor ?? this.mainColor,
-      visitorColor: visitorColor ?? this.visitorColor,
-      nameTextStyle: nameTextStyle ?? this.nameTextStyle,
-      descriptionTextStyle: descriptionTextStyle ?? this.descriptionTextStyle,
-    );
-  }
-}
 
 class _DefaultStyle extends ChatStyle {
   final Color mainColor = Colors.blue;
@@ -39,7 +14,7 @@ class _DefaultStyle extends ChatStyle {
     color: Colors.white,
   );
 
-  final TextStyle descriptionTextStyle = const TextStyle(
+  final TextStyle messageTextStyle = const TextStyle(
     color: Colors.white,
   );
 
@@ -47,7 +22,7 @@ class _DefaultStyle extends ChatStyle {
     Color mainColor,
     Color visitorColor,
     TextStyle nameTextStyle,
-    TextStyle descriptionTextStyle,
+    TextStyle messageTextStyle,
   });
 }
 
@@ -155,7 +130,7 @@ class _ZendeskChatWidgetState extends State<ZendeskChatWidget> {
                   ),
                   Text(
                     chatItem?.message ?? '',
-                    style: chatStyle.descriptionTextStyle,
+                    style: chatStyle.messageTextStyle,
                   ),
                 ],
               )
